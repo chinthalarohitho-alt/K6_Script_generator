@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K6 Load Test Script Configuration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-gradient"></div>
+            <h1 class="main-title">K6 Load Test Script Configuration</h1>
+            <p class="subtitle">Powered by QA</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Mode Selection -->
+            <section class="section">
+                <h2>Choose an option:</h2>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="mode" value="upload" id="modeUpload">
+                        <span>Upload K6 Script to Extract Configuration</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="mode" value="new" id="modeNew">
+                        <span>Make new script</span>
+                    </label>
+                    <input type="file" id="fileUpload" name="modify" accept=".js,.json" style="display: none;">
+                    <label for="fileUpload" id="fileUploadLabel" style="display:none; cursor:pointer;">
+                        <span class="upload-icon">📁</span>
+                        <span class="upload-text">Choose K6 Script File</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Base URL -->
+            <section class="section">
+                <h2>Base URL</h2>
+                <input type="text" id="baseUrl" class="form-control" placeholder="https://api.example.com">
+            </section>
+
+             <!-- Bot ID -->
+            <section class="section">
+                <h2>Bot Configuration</h2>
+                <div class="form-group">
+                    <label for="botId" class="form-label">Bot ID</label>
+                    <input type="text" id="botId" class="form-control" placeholder="Enter Bot ID (not manditatory)">
+                </div>
+            </section>
+
+            <!-- Tags -->
+            <section class="section">
+                <h2>Tags</h2>
+                <div class="form-group">
+                    <label for="environment" class="form-label">Environment</label>
+                    <input type="text" id="environment" class="form-control" placeholder="dev, staging, prod">
+                </div>
+                <div class="form-group">
+                    <label for="service" class="form-label">Service</label>
+                    <input type="text" id="service" class="form-control" placeholder="api-service">
+                </div>
+            </section>
+
+            <!-- Test Stages -->
+            <section class="section">
+                <h2 id="stagesTitle">Test Stages (Ramping Virtual Users) - 1 Stage</h2>
+                <div class="form-group">
+                    <label for="numStages" class="form-label">Number of stages</label>
+                    <input type="number" id="numStages" class="form-control" min="1" value="1">
+                </div>
+
+                <!-- Stage Selection Controls -->
+                <div class="selection-controls">
+                    <div class="selection-header">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="selectAllStages" class="select-all-checkbox">
+                            <span>Select All Stages</span>
+                        </label>
+                        <div class="selection-info">
+                            <span id="stageSelectionCount">0 of 1 selected</span>
+                        </div>
+                    </div>
+                    <div class="bulk-actions">
+                        <button id="deleteSelectedStages" class="btn btn--sm delete-btn" disabled>🗑️ Delete Selected Stages</button>
+                        <button id="addNewStage" class="btn btn--sm btn--secondary">➕ Add New Stage</button>
+                    </div>
+                </div>
+
+                <div id="stagesContainer"></div>
+            </section>
+
+            <!-- API Endpoints -->
+            <section class="section">
+                <h2 id="endpointsTitle">API Endpoints Configuration - 1 Endpoint</h2>
+                <div class="form-group">
+                    <label for="numEndpoints" class="form-label">Number of endpoints</label>
+                    <input type="number" id="numEndpoints" class="form-control" min="0" max="20" value="1">
+                </div>
+
+                <!-- Endpoint Selection Controls -->
+                <div class="selection-controls">
+                    <div class="selection-header">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="selectAllEndpoints" class="select-all-checkbox">
+                            <span>Select All Endpoints</span>
+                        </label>
+                        <div class="selection-info">
+                            <span id="endpointSelectionCount">0 of 1 selected</span>
+                        </div>
+                    </div>
+                    <div class="bulk-actions">
+                        <button id="deleteSelectedEndpoints" class="btn btn--sm delete-btn" disabled>🗑️ Delete Selected Endpoints</button>
+                        <button id="addNewEndpoint" class="btn btn--sm btn--secondary">➕ Add New Endpoint</button>
+                    </div>
+                </div>
+
+                <div id="endpointsContainer"></div>
+                
+                <!-- Stored Variables Display -->
+                <div class="stored-variables">
+                    <h3>Stored Header Variables</h3>
+                    <div class="form-inline">
+                        <input type="text" id="newVarName" class="form-control" placeholder="Variable name (e.g., API_KEY)">
+                        <input type="text" id="newVarKey" class="form-control" placeholder="Header key (e.g., x-api-key)">
+                        <input type="text" id="newVarValue" class="form-control" placeholder="Header value">
+                        <button id="addStoredVar" class="btn btn--secondary">Add Variable</button>
+                        <button id="prefillApiKeyVar" class="btn btn--sm">Prefill x-api-key</button>
+                    </div>
+                    <div id="storedVariables" class="variables-display">
+                        <em>No variables stored yet</em>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Performance Thresholds -->
+            <section class="section">
+                <h2>Performance Thresholds</h2>
+                <div class="form-group">
+                    <label for="thresholdDuration" class="form-label">HTTP Request Duration Threshold</label>
+                    <input type="text" id="thresholdDuration" class="form-control" value="p(95)<500" placeholder="e.g. p(95)<500">
+                </div>
+                <div class="form-group">
+                    <label for="thresholdError" class="form-label">HTTP Request Failed Rate Threshold</label>
+                    <input type="text" id="thresholdError" class="form-control" value="rate<0.05" placeholder="e.g. rate<0.05">
+                </div>
+            </section>
+
+            <!-- Think Time -->
+            <section class="section">
+                <h2>Think Time Between Requests</h2>
+                <div class="form-group">
+                    <label for="thinkTime" class="form-label">Think time (seconds)</label>
+                    <input type="number" id="thinkTime" class="form-control" value="1" min="0" step="0.1">
+                </div>
+            </section>
+
+            <!-- Generated Script -->
+            <section class="section ">
+                <h2>Generated K6 Script</h2>
+                <div class="script-container">
+                    <textarea id="generatedScript" class="script-editor">// Generated K6 script will appear here</textarea>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="section">
+                <div class="actions">
+                    <button id="downloadScript" class="btn btn--secondary">Download Script</button>
+                    <button id="clearAllData" class="btn btn--secondary delete-btn">🗑️ Clear All Data</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container hidden"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h3 id="confirmationTitle">Confirm Action</h3>
+            <p id="confirmationMessage">Are you sure you want to perform this action?</p>
+            <div class="modal-actions">
+                <button id="confirmYes" class="btn btn--primary">Yes, Delete</button>
+                <button id="confirmNo" class="btn btn--secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+    // Show file input only when "Upload" radio is selected
+    document.addEventListener('DOMContentLoaded', () => {
+        const modeUpload = document.getElementById('modeUpload');
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        modeUpload.addEventListener('change', () => {
+            if (modeUpload.checked) {
+                fileUploadLabel.style.display = 'inline-block';
+            }
+        });
+        document.getElementById('modeNew').addEventListener('change', () => {
+            fileUploadLabel.style.display = 'none';
+        });
+    });
+    </script>
+</body>
+</html>
