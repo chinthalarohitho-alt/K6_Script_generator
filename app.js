@@ -91,7 +91,7 @@ class K6ConfigApp {
             mode: 'javascript',
             theme: 'material-darker',
             lineNumbers: true,
-            readOnly: true,
+            readOnly: false,
             lineWrapping: true,
             tabSize: 2,
             indentWithTabs: false,
